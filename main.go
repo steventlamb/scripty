@@ -36,15 +36,13 @@ func main() {
 		log.Fatal("can't read cwd %s", cwd)
 	}
 
+	args := os.Args[1:]
+	copy(args, args)
+
 	var scriptArg string
 
-	switch len(os.Args) {
-	case 1:
-		scriptArg = ""
-	case 2:
-		scriptArg = os.Args[1]
-	default:
-		log.Fatal("too many args")
+	if len(args) > 0 {
+		scriptArg = args[0]
 	}
 
 	scriptyDir := findScriptyDir(cwd)
@@ -70,8 +68,8 @@ func main() {
 			}
 			_, found = choices[name]
 			if found {
-				execPath := path.Join(scriptyDir, name)
-				cmd := exec.Command("bash", execPath)
+				args[0] = path.Join(scriptyDir, name)
+				cmd := exec.Command("bash", args...)
 				cmd.Stdout = os.Stdout
 				cmd.Stderr = os.Stderr
 				cmd.Run()
