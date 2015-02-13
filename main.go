@@ -75,10 +75,11 @@ func main() {
 				cmd.Stdout = os.Stdout
 				cmd.Stderr = os.Stderr
 				cmd.Run()
+				break
 			}
 		}
 		if !found {
-			log.Fatal("argument not found in scripts")
+			log.Fatal("argument not found in scripts: ", scriptArg)
 		}
 	}
 }
