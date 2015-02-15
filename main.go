@@ -17,7 +17,7 @@ const (
 	scriptyDir = "scripts"
 	chooseMsg = "choose one of the following:"
 	scriptRunner = "bash"
-	cantReadCwd = "can't read cwd"
+	cantReadDir = "can't read dir"
 	argNotFound = "argument not found in scripts"
 	defaultSuffix = ".sh"
 )
@@ -41,7 +41,7 @@ func findScriptyDir(startPath string) string {
 func main() {
 	cwd, err := os.Getwd()
 	if err != nil {
-		log.Fatal(cantReadCwd, " ", cwd)
+		log.Fatal(cantReadDir, ": ", cwd)
 	}
 
 	args := os.Args[1:]
@@ -54,7 +54,11 @@ func main() {
 	}
 
 	scriptyDir := findScriptyDir(cwd)
-	files, _ := ioutil.ReadDir(scriptyDir)
+	files, err := ioutil.ReadDir(scriptyDir)
+
+	if err != nil {
+		log.Fatal(cantReadDir, ": ", scriptyDir)
+	}
 
 	if scriptArg == "" {
 		fmt.Println(chooseMsg)
