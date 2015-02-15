@@ -12,18 +12,28 @@ import (
 
 type stringSet map[string]bool
 
+const (
+	noScriptyDirError = "No scripty dir found"
+	scriptyDir = "scripts"
+	chooseMsg = "choose one of the following:"
+	scriptRunner = "bash"
+	cantReadCwd = "can't read cwd"
+	argNotFound = "argument not found in scripts"
+	defaultSuffix = ".sh"
+)
+
 func findScriptyDir(startPath string) string {
 	// make sure we haven't recursed all the way up
 	if path.Clean(startPath) == "/" {
-		log.Fatal("No scripty dir found")
+		log.Fatal(noScriptyDirError)
 	}
 
 	files, _ := ioutil.ReadDir(startPath)
 	for _, file := range files {
 		// TODO: make this configurable with a .scripty file
 		// instead.
-		if file.Name() == "scripts" {
-			return path.Join(startPath, "scripts")
+		if file.Name() == scriptyDir {
+			return path.Join(startPath, scriptyDir)
 		}
 	}
 	return findScriptyDir(path.Join(startPath, ".."))
@@ -33,7 +43,7 @@ func findScriptyDir(startPath string) string {
 func main() {
 	cwd, err := os.Getwd()
 	if err != nil {
-		log.Fatal("can't read cwd %s", cwd)
+		log.Fatal(cantReadCwd, " ", cwd)
 	}
 
 	args := os.Args[1:]
@@ -49,7 +59,7 @@ func main() {
 	files, _ := ioutil.ReadDir(scriptyDir)
 
 	if scriptArg == "" {
-		fmt.Println("choose one of the following:")
+		fmt.Println(chooseMsg)
 		for _, file := range files {
 			fmt.Println(file.Name())
 		}
@@ -61,15 +71,15 @@ func main() {
 			// convenience. Otherwise, match exactly.
 			name := file.Name()
 			var choices stringSet
-			if strings.HasSuffix(name, ".sh") {
-				choices = stringSet{scriptArg: true, scriptArg + ".sh": true}
+			if strings.HasSuffix(name, defaultSuffix) {
+				choices = stringSet{scriptArg: true, scriptArg + defaultSuffix: true}
 			} else {
 				choices = stringSet{scriptArg: true}
 			}
 			_, found = choices[name]
 			if found {
 				args[0] = path.Join(scriptyDir, name)
-				cmd := exec.Command("bash", args...)
+				cmd := exec.Command(scriptRunner, args...)
 				cmd.Stdout = os.Stdout
 				cmd.Stderr = os.Stderr
 				cmd.Run()
@@ -77,7 +87,7 @@ func main() {
 			}
 		}
 		if !found {
-			log.Fatal("argument not found in scripts: ", scriptArg)
+			log.Fatal(argNotFound, ": ", scriptArg)
 		}
 	}
 }
