@@ -35,25 +35,39 @@ func findScriptyDir(startPath string) string {
 		}
 	}
 	return findScriptyDir(path.Join(startPath, ".."))
-
 }
 
-func main() {
+func parseArgs() (scriptArg string, args []string) {
+	args = os.Args[1:]
+	copy(args, args)
+
+	if len(args) > 0 {
+		scriptArg = args[0]
+	}
+	return
+}
+
+func getScriptyDir() string {
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(cantReadDir, ": ", cwd)
 	}
 
-	args := os.Args[1:]
-	copy(args, args)
+	return findScriptyDir(cwd)
+}
 
-	var scriptArg string
+func runCommandInteractively(args []string) {
+	cmd := exec.Command(scriptRunner, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Run()
+}
 
-	if len(args) > 0 {
-		scriptArg = args[0]
-	}
+func main() {
+	scriptArg, args := parseArgs()
 
-	scriptyDir := findScriptyDir(cwd)
+	scriptyDir := getScriptyDir()
+
 	files, err := ioutil.ReadDir(scriptyDir)
 
 	if err != nil {
@@ -81,10 +95,7 @@ func main() {
 			_, found = choices[name]
 			if found {
 				args[0] = path.Join(scriptyDir, name)
-				cmd := exec.Command(scriptRunner, args...)
-				cmd.Stdout = os.Stdout
-				cmd.Stderr = os.Stderr
-				cmd.Run()
+				runCommandInteractively(args)
 				break
 			}
 		}
