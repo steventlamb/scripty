@@ -30,8 +30,6 @@ func findScriptyDir(startPath string) string {
 
 	files, _ := ioutil.ReadDir(startPath)
 	for _, file := range files {
-		// TODO: make this configurable with a .scripty file
-		// instead.
 		if file.Name() == scriptyDir {
 			return path.Join(startPath, scriptyDir)
 		}
