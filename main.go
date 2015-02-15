@@ -14,12 +14,12 @@ type stringSet map[string]bool
 
 const (
 	noScriptyDirError = "No scripty dir found"
-	scriptyDir = "scripts"
-	chooseMsg = "choose one of the following:"
-	scriptRunner = "bash"
-	cantReadDir = "can't read dir"
-	argNotFound = "argument not found in scripts"
-	defaultSuffix = ".sh"
+	scriptyDir        = "scripts"
+	chooseMsg         = "choose one of the following:"
+	scriptRunner      = "bash"
+	cantReadDir       = "can't read dir"
+	argNotFound       = "argument not found in scripts"
+	defaultSuffix     = ".sh"
 )
 
 func findScriptyDir(startPath string) string {
