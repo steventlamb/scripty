@@ -67,7 +67,11 @@ func runCommandInteractively(args []string) {
 	cmd := exec.Command(scriptRunner, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+	err := cmd.Run()
+
+	if err != nil {
+		log.Fatal("SCRIPTY ERROR: ", err)
+	}
 }
 
 func main() {
