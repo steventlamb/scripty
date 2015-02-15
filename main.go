@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -22,6 +23,10 @@ const (
 	defaultSuffix     = ".sh"
 )
 
+var (
+	listOnly = flag.Bool("l", false, "Print all possible scripts")
+)
+
 func findScriptyDir(startPath string) string {
 	// make sure we haven't recursed all the way up
 	if path.Clean(startPath) == "/" {
@@ -38,10 +43,12 @@ func findScriptyDir(startPath string) string {
 }
 
 func parseArgs() (scriptArg string, args []string) {
+	flag.Parse()
+
 	args = os.Args[1:]
 	copy(args, args)
 
-	if len(args) > 0 {
+	if len(args) > 0 && !*listOnly {
 		scriptArg = args[0]
 	}
 	return
@@ -75,9 +82,15 @@ func main() {
 	}
 
 	if scriptArg == "" {
-		fmt.Println(chooseMsg)
+		if !*listOnly {
+			fmt.Println(chooseMsg)
+		}
 		for _, file := range files {
-			fmt.Println(file.Name())
+			name := file.Name()
+			if strings.HasSuffix(name, defaultSuffix) {
+				name = strings.NewReplacer(defaultSuffix, "").Replace(name)
+			}
+			fmt.Println(name)
 		}
 	} else {
 		var found bool
