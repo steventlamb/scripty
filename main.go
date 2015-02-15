@@ -17,13 +17,12 @@ const (
 	noScriptyDirError = "No scripty dir found"
 	scriptyDir        = "scripts"
 	chooseMsg         = "choose one of the following:"
-	scriptRunner      = "bash"
 	cantReadDir       = "can't read dir"
 	argNotFound       = "argument not found in scripts"
-	defaultSuffix     = ".sh"
 )
 
 var (
+	suffixWhiteList = []string{".sh", ".py"}
 	listOnly = flag.Bool("l", false, "Print all possible scripts")
 )
 
@@ -64,7 +63,7 @@ func getScriptyDir() string {
 }
 
 func runCommandInteractively(args []string) {
-	cmd := exec.Command(scriptRunner, args...)
+	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
@@ -91,32 +90,38 @@ func main() {
 		}
 		for _, file := range files {
 			name := file.Name()
-			if strings.HasSuffix(name, defaultSuffix) {
-				name = strings.NewReplacer(defaultSuffix, "").Replace(name)
+			for _, suffix := range suffixWhiteList {
+				if strings.HasSuffix(name, suffix) {
+					name = strings.NewReplacer(suffix, "").Replace(name)
+				}
+				break
 			}
 			fmt.Println(name)
 		}
 	} else {
-		var found bool
+		var foundScript bool
 		for _, file := range files {
 			// if the filename ends in .sh, then we can
 			// optionally omit it from the scriptArg for
 			// convenience. Otherwise, match exactly.
 			name := file.Name()
-			var choices stringSet
-			if strings.HasSuffix(name, defaultSuffix) {
-				choices = stringSet{scriptArg: true, scriptArg + defaultSuffix: true}
-			} else {
-				choices = stringSet{scriptArg: true}
+
+			choices := stringSet{scriptArg: true}
+			for _, suffix := range suffixWhiteList {
+				if strings.HasSuffix(name, suffix) {
+					choices[scriptArg + suffix] = true
+					break
+				}
 			}
-			_, found = choices[name]
-			if found {
+
+			_, foundScript = choices[name]
+			if foundScript {
 				args[0] = path.Join(scriptyDir, name)
 				runCommandInteractively(args)
 				break
 			}
 		}
-		if !found {
+		if !foundScript {
 			log.Fatal(argNotFound, ": ", scriptArg)
 		}
 	}
