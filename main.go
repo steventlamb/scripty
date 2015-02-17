@@ -94,8 +94,8 @@ func main() {
 				for _, suffix := range suffixWhiteList {
 					if strings.HasSuffix(name, suffix) {
 						name = strings.NewReplacer(suffix, "").Replace(name)
+						break
 					}
-					break
 				}
 				fmt.Println(name)
 			}
