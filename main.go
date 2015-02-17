@@ -16,7 +16,6 @@ type stringSet map[string]bool
 const (
 	noScriptyDirError = "No scripty dir found"
 	scriptyDir        = "scripts"
-	chooseMsg         = "choose one of the following:"
 	cantReadDir       = "can't read dir"
 	argNotFound       = "argument not found in scripts"
 )
@@ -87,17 +86,19 @@ func main() {
 
 	if scriptArg == "" {
 		if !*listOnly {
-			fmt.Println(chooseMsg)
-		}
-		for _, file := range files {
-			name := file.Name()
-			for _, suffix := range suffixWhiteList {
-				if strings.HasSuffix(name, suffix) {
-					name = strings.NewReplacer(suffix, "").Replace(name)
+			fmt.Println("USAGE: (COMING SOON)")
+			fmt.Println("Run 'scripty -l' to see possible scripts")
+		} else {
+			for _, file := range files {
+				name := file.Name()
+				for _, suffix := range suffixWhiteList {
+					if strings.HasSuffix(name, suffix) {
+						name = strings.NewReplacer(suffix, "").Replace(name)
+					}
+					break
 				}
-				break
+				fmt.Println(name)
 			}
-			fmt.Println(name)
 		}
 	} else {
 		var foundScript bool
