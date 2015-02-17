@@ -1,6 +1,6 @@
 # scripty
 
-Run scripts from a nearby directory without navigating away from current.
+Run scripts from a nested directory without navigating up to project root.
 
 ## usage
 
