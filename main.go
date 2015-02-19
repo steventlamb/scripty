@@ -15,7 +15,9 @@ type stringSet map[string]bool
 
 const (
 	noScriptyDirError = "No scripty dir found"
-	scriptyDir        = "scripts"
+	scriptyDirName        = "scripts"
+	noScriptyDirError = "No scripty dir '%s' found"
+	scriptyDirName    = "scripts"
 	cantReadDir       = "can't read dir"
 	argNotFound       = "argument not found in scripts"
 )
@@ -33,8 +35,8 @@ func findScriptyDir(startPath string) string {
 
 	files, _ := ioutil.ReadDir(startPath)
 	for _, file := range files {
-		if file.Name() == scriptyDir {
-			return path.Join(startPath, scriptyDir)
+		if file.Name() == scriptyDirName {
+			return path.Join(startPath, scriptyDirName)
 		}
 	}
 	return findScriptyDir(path.Join(startPath, ".."))
