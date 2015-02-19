@@ -33,6 +33,11 @@ qux
 
 ```
 
+## customization
+
+Instead of looking for a `scripts` dir, you can set an environment variable `SCRIPTY_DIR` to the name
+of a folder, without slashes, to look for scripts in.
+
 ## motivation
 
 Scripty is inspired by the behavior of modern tools like fabric, vagrant, etc.

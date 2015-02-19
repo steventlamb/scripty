@@ -14,12 +14,11 @@ import (
 type stringSet map[string]bool
 
 const (
-	noScriptyDirError = "No scripty dir found"
-	scriptyDirName        = "scripts"
-	noScriptyDirError = "No scripty dir '%s' found"
-	scriptyDirName    = "scripts"
-	cantReadDir       = "can't read dir"
-	argNotFound       = "argument not found in scripts"
+	noScriptyDirError     = "No scripty dir '%s' found"
+	scriptyDirEnvVar      = "SCRIPTY_DIR"
+	defaultScriptyDirName = "scripts"
+	cantReadDir           = "can't read dir"
+	argNotFound           = "argument not found in scripts"
 )
 
 var (
@@ -28,9 +27,15 @@ var (
 )
 
 func findScriptyDir(startPath string) string {
+	scriptyDirName := os.Getenv(scriptyDirEnvVar)
+
+	if scriptyDirName == "" {
+		scriptyDirName = defaultScriptyDirName
+	}
+
 	// make sure we haven't recursed all the way up
 	if path.Clean(startPath) == "/" {
-		log.Fatal(noScriptyDirError)
+		log.Fatal(fmt.Sprintf(noScriptyDirError + "\n", scriptyDirName))
 	}
 
 	files, _ := ioutil.ReadDir(startPath)
