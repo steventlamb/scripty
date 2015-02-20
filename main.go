@@ -82,8 +82,24 @@ func runCommandInteractively(args []string) {
 	}
 }
 
+func getScriptInfo(file os.FileInfo) string {
+	name := file.Name()
+	for _, suffix := range suffixWhiteList {
+		if strings.HasSuffix(name, suffix) {
+			name = strings.NewReplacer(suffix, "").Replace(name)
+			break
+		}
+	}
+	return name
+}
+
 func main() {
 	scriptArg, args := parseArgs()
+
+	if scriptArg == "" && !*listOnly {
+		fmt.Print(usage)
+		return
+	}
 
 	scriptyDir := getScriptyDir()
 
@@ -94,45 +110,35 @@ func main() {
 	}
 
 	if scriptArg == "" {
-		if !*listOnly {
-			fmt.Print(usage)
-		} else {
-			for _, file := range files {
-				name := file.Name()
-				for _, suffix := range suffixWhiteList {
-					if strings.HasSuffix(name, suffix) {
-						name = strings.NewReplacer(suffix, "").Replace(name)
-						break
-					}
-				}
-				fmt.Println(name)
-			}
-		}
-	} else {
-		var foundScript bool
 		for _, file := range files {
-			// if the filename ends in .sh, then we can
-			// optionally omit it from the scriptArg for
-			// convenience. Otherwise, match exactly.
-			name := file.Name()
+			fmt.Println(getScriptInfo(file))
+		}
+		return
+	}
 
-			choices := stringSet{scriptArg: true}
-			for _, suffix := range suffixWhiteList {
-				if strings.HasSuffix(name, suffix) {
-					choices[scriptArg+suffix] = true
-					break
-				}
-			}
+	var foundScript bool
+	for _, file := range files {
+		// if the filename ends in .sh, then we can
+		// optionally omit it from the scriptArg for
+		// convenience. Otherwise, match exactly.
+		name := file.Name()
 
-			_, foundScript = choices[name]
-			if foundScript {
-				args[0] = path.Join(scriptyDir, name)
-				runCommandInteractively(args)
+		choices := stringSet{scriptArg: true}
+		for _, suffix := range suffixWhiteList {
+			if strings.HasSuffix(name, suffix) {
+				choices[scriptArg+suffix] = true
 				break
 			}
 		}
-		if !foundScript {
-			log.Fatal(argNotFound, ": ", scriptArg)
+
+		_, foundScript = choices[name]
+		if foundScript {
+			args[0] = path.Join(scriptyDir, name)
+			runCommandInteractively(args)
+			break
 		}
+	}
+	if !foundScript {
+		log.Fatal(argNotFound, ": ", scriptArg)
 	}
 }
