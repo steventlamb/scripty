@@ -14,6 +14,8 @@ import (
 type stringSet map[string]bool
 
 const (
+	usage = ("Usage: scripty [-l] [<script_name>]\n\n" +
+		"Run 'scripty -l' to see possible scripts\n")
 	noScriptyDirError     = "No scripty dir '%s' found"
 	scriptyDirEnvVar      = "SCRIPTY_DIR"
 	defaultScriptyDirName = "scripts"
@@ -23,7 +25,7 @@ const (
 
 var (
 	suffixWhiteList = []string{".sh", ".py"}
-	listOnly = flag.Bool("l", false, "Print all possible scripts")
+	listOnly        = flag.Bool("l", false, "Print all possible scripts")
 )
 
 func findScriptyDir(startPath string) string {
@@ -35,7 +37,7 @@ func findScriptyDir(startPath string) string {
 
 	// make sure we haven't recursed all the way up
 	if path.Clean(startPath) == "/" {
-		log.Fatal(fmt.Sprintf(noScriptyDirError + "\n", scriptyDirName))
+		log.Fatal(fmt.Sprintf(noScriptyDirError+"\n", scriptyDirName))
 	}
 
 	files, _ := ioutil.ReadDir(startPath)
@@ -93,8 +95,7 @@ func main() {
 
 	if scriptArg == "" {
 		if !*listOnly {
-			fmt.Println("USAGE: (COMING SOON)")
-			fmt.Println("Run 'scripty -l' to see possible scripts")
+			fmt.Print(usage)
 		} else {
 			for _, file := range files {
 				name := file.Name()
@@ -118,7 +119,7 @@ func main() {
 			choices := stringSet{scriptArg: true}
 			for _, suffix := range suffixWhiteList {
 				if strings.HasSuffix(name, suffix) {
-					choices[scriptArg + suffix] = true
+					choices[scriptArg+suffix] = true
 					break
 				}
 			}
