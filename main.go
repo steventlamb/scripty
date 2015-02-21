@@ -13,6 +13,12 @@ import (
 
 type stringSet map[string]bool
 
+type scriptInfo struct {
+	Name   string
+	Suffix string
+	Path   string
+}
+
 const (
 	usage = ("Usage: scripty [-l] [<script_name>]\n\n" +
 		"Run 'scripty -l' to see possible scripts\n")
@@ -86,15 +92,19 @@ func runCommandInteractively(args []string) {
 	}
 }
 
-func getScriptInfo(file os.FileInfo) string {
+func getScriptInfo(scriptyDir string, file os.FileInfo) *scriptInfo {
+	scriptInfo := &scriptInfo{}
 	name := file.Name()
+	scriptInfo.Path = path.Join(scriptyDir, name)
 	for _, suffix := range suffixWhiteList {
 		if strings.HasSuffix(name, suffix) {
 			name = strings.NewReplacer(suffix, "").Replace(name)
+			scriptInfo.Suffix = suffix
 			break
 		}
 	}
-	return name
+	scriptInfo.Name = name
+	return scriptInfo
 }
 
 func main() {
@@ -113,36 +123,27 @@ func main() {
 		log.Fatal(cantReadDir, ": ", scriptyDir)
 	}
 
+	scriptInfos := make([]*scriptInfo, len(files))
+	for i, file := range files {
+		scriptInfos[i] = getScriptInfo(scriptyDir, file)
+	}
+
 	if scriptArg == "" {
-		for _, file := range files {
-			fmt.Println(getScriptInfo(file))
+		for _, scriptInfo := range scriptInfos {
+			fmt.Println(scriptInfo.Name)
 		}
 		return
 	}
 
-	var foundScript bool
-	for _, file := range files {
-		// if the filename ends in .sh, then we can
-		// optionally omit it from the scriptArg for
-		// convenience. Otherwise, match exactly.
-		name := file.Name()
-
-		choices := stringSet{scriptArg: true}
-		for _, suffix := range suffixWhiteList {
-			if strings.HasSuffix(name, suffix) {
-				choices[scriptArg+suffix] = true
-				break
-			}
-		}
-
-		_, foundScript = choices[name]
-		if foundScript {
-			args[0] = path.Join(scriptyDir, name)
+	for _, scriptInfo := range scriptInfos {
+		if scriptArg == scriptInfo.Name ||
+			scriptArg == (scriptInfo.Name + scriptInfo.Suffix) {
+			args[0] = scriptInfo.Path
 			runCommandInteractively(args)
 			break
 		}
 	}
-	if !foundScript {
-		log.Fatal(argNotFound, ": ", scriptArg)
-	}
+
+	log.Fatal(argNotFound, ": ", scriptArg)
+
 }
