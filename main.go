@@ -37,7 +37,11 @@ func findScriptyDir(startPath string) string {
 
 	// make sure we haven't recursed all the way up
 	if path.Clean(startPath) == "/" {
-		log.Fatal(fmt.Sprintf(noScriptyDirError+"\n", scriptyDirName))
+		if *listOnly {
+			os.Exit(1)
+		} else {
+			log.Fatal(fmt.Sprintf(noScriptyDirError+"\n", scriptyDirName))
+		}
 	}
 
 	files, _ := ioutil.ReadDir(startPath)
