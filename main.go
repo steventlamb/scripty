@@ -92,6 +92,23 @@ func runCommandInteractively(args []string) {
 	}
 }
 
+func getScriptInfos(scriptyDir string) []*scriptInfo {
+	files, err := ioutil.ReadDir(scriptyDir)
+
+	if err != nil {
+		log.Fatal(cantReadDir, ": ", scriptyDir)
+	}
+
+	scriptInfos := make([]*scriptInfo, len(files))
+	for i, file := range files {
+		if file.Mode().IsDir() {
+			// TODO
+		}
+		scriptInfos[i] = getScriptInfo(scriptyDir, file)
+	}
+	return scriptInfos
+}
+
 func getScriptInfo(scriptyDir string, file os.FileInfo) *scriptInfo {
 	scriptInfo := &scriptInfo{}
 	name := file.Name()
@@ -117,16 +134,7 @@ func main() {
 
 	scriptyDir := getScriptyDir()
 
-	files, err := ioutil.ReadDir(scriptyDir)
-
-	if err != nil {
-		log.Fatal(cantReadDir, ": ", scriptyDir)
-	}
-
-	scriptInfos := make([]*scriptInfo, len(files))
-	for i, file := range files {
-		scriptInfos[i] = getScriptInfo(scriptyDir, file)
-	}
+	scriptInfos := getScriptInfos(scriptyDir)
 
 	if scriptArg == "" {
 		for _, scriptInfo := range scriptInfos {
