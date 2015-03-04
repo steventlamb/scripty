@@ -140,7 +140,7 @@ func main() {
 			scriptArg == (scriptInfo.Name + scriptInfo.Suffix) {
 			args[0] = scriptInfo.Path
 			runCommandInteractively(args)
-			break
+			return
 		}
 	}
 
