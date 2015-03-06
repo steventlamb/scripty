@@ -38,6 +38,25 @@ qux
 Instead of looking for a `scripts` dir, you can set an environment variable `SCRIPTY_DIR` to the name
 of a folder, without slashes, to look for scripts in.
 
+## bash completion
+
+Depending on your platform, and setup, you can add bash completion in one of two ways:
+
+### binary only
+
+If you downloaded a binary from the releases page, you can add bash completion with something like:
+```shell
+sudo bash -c "curl https://raw.githubusercontent.com/steventlamb/scripty/master/scripty_completion.sh > /etc/bash_completion.d/scripty"
+```
+
+### with source
+
+Assuming you have scripty in your go path:
+
+```shell
+ln -s $GOPATH/scripty/scripty_completion.sh /etc/bash_completion.d/scripty
+```
+
 ## motivation
 
 Scripty is inspired by the behavior of modern tools like fabric, vagrant, etc.
