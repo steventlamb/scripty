@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -32,6 +33,7 @@ const (
 var (
 	suffixWhiteList = []string{".sh", ".py"}
 	listOnly        = flag.Bool("l", false, "Print all possible scripts")
+	detailOnly      = flag.Bool("d", false, "Print all scripts with docstring, if available")
 )
 
 func findScriptyDir(startPath string) string {
@@ -43,7 +45,7 @@ func findScriptyDir(startPath string) string {
 
 	// make sure we haven't recursed all the way up
 	if path.Clean(startPath) == "/" {
-		if *listOnly {
+		if *listOnly || *detailOnly {
 			os.Exit(1)
 		} else {
 			log.Fatal(fmt.Sprintf(noScriptyDirError+"\n", scriptyDirName))
@@ -65,7 +67,7 @@ func parseArgs() (scriptArg string, args []string) {
 	args = os.Args[1:]
 	copy(args, args)
 
-	if len(args) > 0 && !*listOnly {
+	if len(args) > 0 && !*listOnly && !*detailOnly {
 		scriptArg = args[0]
 	}
 	return
@@ -90,6 +92,40 @@ func runCommandInteractively(args []string) {
 	if err != nil {
 		log.Fatal("SCRIPTY ERROR: ", err)
 	}
+}
+
+func readFirstComment(path string) (string, error) {
+	file, err := os.Open(path)
+	defer file.Close()
+
+	if err != nil {
+		return "", err
+	}
+
+	scanner := bufio.NewScanner(file)
+
+	scanner.Scan()
+	currentLine := scanner.Text()
+
+	for i := 0; i < 20 && (currentLine == "" || strings.HasPrefix(currentLine, "#!")); i++ {
+		scanner.Scan()
+		currentLine = scanner.Text()
+	}
+
+	if !strings.HasPrefix(currentLine, "#") {
+		return "", nil
+	}
+
+	return strings.TrimRight(strings.TrimLeft(currentLine, "# "), " "), nil
+}
+
+func (info *scriptInfo) getDescription() string {
+	description, err := readFirstComment(info.Path)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	return description
 }
 
 func getScriptInfos(nodePath string) []*scriptInfo {
@@ -129,7 +165,7 @@ func getScriptInfo(scriptyDir string, file os.FileInfo) *scriptInfo {
 func main() {
 	scriptArg, args := parseArgs()
 
-	if scriptArg == "" && !*listOnly {
+	if scriptArg == "" && !*listOnly && !*detailOnly {
 		fmt.Print(usage)
 		return
 	}
@@ -139,8 +175,19 @@ func main() {
 	scriptInfos := getScriptInfos(scriptyDir)
 
 	if scriptArg == "" {
+		var longName string
 		for _, scriptInfo := range scriptInfos {
-			fmt.Println(scriptInfo.Name)
+			if *detailOnly {
+				fmt.Printf("%-25.25s %s\n", scriptInfo.Name, scriptInfo.getDescription())
+				if len(scriptInfo.Name) > 25 {
+					longName = scriptInfo.Name
+				}
+			} else {
+				fmt.Println(scriptInfo.Name)
+			}
+		}
+		if longName != "" {
+			log.Fatalf("'%s' truncated for readability! Use 'scripty -l' instead.\n", longName)
 		}
 		return
 	}
