@@ -21,8 +21,7 @@ type scriptInfo struct {
 }
 
 const (
-	usage = ("Usage: scripty [-l] [<script_name>]\n\n" +
-		"Run 'scripty -l' to see possible scripts\n")
+	usagePrefix           = "Usage: scripty [options | <script_name>]\n\n"
 	noScriptyDirError     = "No scripty dir '%s' found"
 	scriptyDirEnvVar      = "SCRIPTY_DIR"
 	defaultScriptyDirName = "scripts"
@@ -32,8 +31,8 @@ const (
 
 var (
 	suffixWhiteList = []string{".sh", ".py"}
-	listOnly        = flag.Bool("l", false, "Print all possible scripts")
-	detailOnly      = flag.Bool("d", false, "Print all scripts with docstring, if available")
+	listOnly        = flag.Bool("l", false, "Print all available scripts (in machine readable format)")
+	detailOnly      = flag.Bool("d", false, "Print all available scripts (with docstring, if available)")
 )
 
 func findScriptyDir(startPath string) string {
@@ -164,9 +163,9 @@ func getScriptInfo(scriptyDir string, file os.FileInfo) *scriptInfo {
 
 func main() {
 	scriptArg, args := parseArgs()
-
 	if scriptArg == "" && !*listOnly && !*detailOnly {
-		fmt.Print(usage)
+		fmt.Print(usagePrefix)
+		flag.PrintDefaults()
 		return
 	}
 
