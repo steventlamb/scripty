@@ -12,8 +12,6 @@ import (
 	"strings"
 )
 
-type stringSet map[string]bool
-
 type scriptInfo struct {
 	Name   string
 	Suffix string
