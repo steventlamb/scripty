@@ -40,6 +40,12 @@ of a folder, without slashes, to look for scripts in.
 
 ## shell completions
 
+Execute one of the following snippets to add completion for your favorite shell. If you downloaded the the binary only, you'll want to use the following technique to download the completion script instead of `cp`ing it.
+
+ ```shell
+curl https://raw.githubusercontent.com/steventlamb/scripty/master/completions/scripty.sh > ~/.bash_completion.d/scripty
+```
+
 ### bash
 
 ```shell
