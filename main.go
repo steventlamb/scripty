@@ -134,7 +134,7 @@ func getScriptInfos(nodePath string) []*scriptInfo {
 
 	nodeInfos := make([]*scriptInfo, 0)
 	for _, file := range files {
-		if file.Mode().IsDir() {
+		if !file.Mode().IsRegular() {
 			childPath := path.Join(nodePath, file.Name())
 			nodeInfos = append(nodeInfos, getScriptInfos(childPath)...)
 		} else {
