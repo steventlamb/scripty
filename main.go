@@ -25,6 +25,7 @@ const (
 	defaultScriptyDirName = "scripts"
 	cantReadDir           = "can't read dir"
 	argNotFound           = "argument not found in scripts"
+	readUntilBodyLimit    = 20
 )
 
 var (
@@ -91,6 +92,10 @@ func runCommandInteractively(args []string) {
 	}
 }
 
+func isIgnoredHeaderLine(line string) bool {
+	return line == "" || strings.HasPrefix(line, "#!")
+}
+
 func readFirstComment(path string) (string, error) {
 	file, err := os.Open(path)
 	defer file.Close()
@@ -104,11 +109,14 @@ func readFirstComment(path string) (string, error) {
 	scanner.Scan()
 	currentLine := scanner.Text()
 
-	for i := 0; i < 20 && (currentLine == "" || strings.HasPrefix(currentLine, "#!")); i++ {
+	// skip whitespace lines and the shebang
+	for i := 0; i < readUntilBodyLimit && isIgnoredHeaderLine(currentLine); i++ {
 		scanner.Scan()
 		currentLine = scanner.Text()
 	}
 
+	// if you've reached something that isn't a comment, there are no docs
+	// at the top, so return nothing
 	if !strings.HasPrefix(currentLine, "#") {
 		return "", nil
 	}
