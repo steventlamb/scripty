@@ -35,8 +35,12 @@ qux
 
 ## customization
 
-Instead of looking for a `scripts` dir, you can set an environment variable `SCRIPTY_DIR` to the name
-of a folder, without slashes, to look for scripts in.
+Instead of looking for a `scripts` dir, you can set `scriptyDir` in a `.scripty.json` file at the root level where the scripts folder is, to a folder, without slashes, to look for scripts in.
+
+Example `.scripty.json`:
+```json
+{"scriptyDir": "scripty_scripts"}
+```
 
 ## shell completions
 
