@@ -1,3 +1,5 @@
+### scripty is no longer supported. please use [kj](http://github.com/steventlamb/kj).
+
 # scripty
 
 Run scripts from a nested directory without navigating up to project root.
